@@ -11,8 +11,6 @@ namespace FTPUtil
 {
     public class FTP
     {
-        //本地当前工作路径（绝对路径），用于上传、下载等操作
-        public String LocalAddress { get; set; }
 
         //控制端口的socket用于传输命令，数据端口的socket用于数据传输
         internal Socket controlSocket;
@@ -111,11 +109,8 @@ namespace FTPUtil
         public static void Main()
         {
             FTP ftp = new FTP("192.168.1.4", 21);
-            ftp.LocalAddress = "D:\\";
-            CommandFactory factory = new CommandFactory(ftp);
-            ICommand cmd;
-            cmd = factory.GetCommand("RETR");
-            cmd.Execute("test.txt");
+            ICommand cmd = new DownloadCommand(ftp,"\\test.txt","D:\\");
+            cmd.Execute();
             Console.Write(cmd.GetReply());
         }
     }

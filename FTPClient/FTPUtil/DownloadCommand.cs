@@ -7,41 +7,45 @@ using System.Threading.Tasks;
 
 namespace FTPUtil
 {
-    class DownloadCommand : ICommand
+    public class DownloadCommand :TransferCommand
     {
-        private FTP ftp;
-        private String fileName;
-        private String reply;
 
-        public DownloadCommand(FTP ftp)
+        public DownloadCommand(FTP ftp,String source,String destination)
         {
             this.ftp = ftp;
+            Source = source;
+            Destination = destination;
         }
 
-        public void Execute()
+        /// <summary>
+        /// 中断下载，并返回下载断点续传类
+        /// </summary>
+        public override ICommand Abort()
         {
-            
+            //todo
+            throw new NotImplementedException();
         }
 
-        /// <param name="cmd">目标文件名</param>
-        public void Execute(string cmd)
+        public override void Execute()
         {
-            fileName = cmd;
-            ftp.Send("RETR " + fileName);
+            //todo:还没有给Size赋值
+            ftp.Send("RETR " + Source);
             reply = ftp.ReadControlPort();
-            FileStream fs = new FileStream(ftp.LocalAddress+cmd, FileMode.Create);
+            FileStream fs = new FileStream(Destination, FileMode.Create);
             int count = 0;
             byte[] data;
             do
             {
                 data = ftp.ReadDataPortAsByte(ref count);
                 fs.Write(data, 0, data.Length);
+                Point += data.Length;
             } while (count > data.Length);
             fs.Flush();
             fs.Close();
         }
+        
 
-        public string GetReply()
+        public override string GetReply()
         {
             return reply;
         }

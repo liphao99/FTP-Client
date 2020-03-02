@@ -9,8 +9,7 @@ namespace FTPUtil
     public interface ICommand
     {
         void Execute();
-
-        void Execute(String cmd);
+        
 
         String GetReply();
     }

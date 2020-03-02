@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FTPUtil
 {
-    class SingleCommand:ICommand
+    public class SingleCommand:ICommand
     {
         private FTP ftp;
         private String reply;
@@ -22,8 +22,7 @@ namespace FTPUtil
             ftp.Send(cmd);
             reply = ftp.ReadControlPort();
         }
-
-        public void Execute(string cmd){}
+        
 
         public string GetReply()
         {
