@@ -1,6 +1,0 @@
-D:\MyStudy\网络工程\FTPClient\FTPUtil\bin\Debug\FTPUtil.pdb
-D:\MyStudy\网络工程\FTPClient\FTPUtil\obj\Debug\FTPUtil.csproj.CoreCompileInputs.cache
-D:\MyStudy\网络工程\FTPClient\FTPUtil\obj\Debug\FTPUtil.pdb
-D:\MyStudy\网络工程\FTPClient\FTPUtil\bin\Debug\FTPUtil.exe
-D:\MyStudy\网络工程\FTPClient\FTPUtil\obj\Debug\FTPUtil.exe
-D:\MyStudy\网络工程\FTPClient\FTPUtil\obj\Debug\FTPUtil.csprojResolveAssemblyReference.cache
