@@ -29,9 +29,12 @@ namespace FTPUtil
         public override void Execute()
         {
             //todo:还没有给Size赋值
+            ftp.Send("SIZE " + Source);
+            Size = int.Parse(ftp.ReadControlPort().Split(' ').Last());
+            String fileName = Source.Split('\\').Last();
             ftp.Send("RETR " + Source);
             reply = ftp.ReadControlPort();
-            FileStream fs = new FileStream(Destination, FileMode.Create);
+            FileStream fs = new FileStream(Destination+fileName, FileMode.Create);
             int count = 0;
             byte[] data;
             do
@@ -39,7 +42,7 @@ namespace FTPUtil
                 data = ftp.ReadDataPortAsByte(ref count);
                 fs.Write(data, 0, data.Length);
                 Point += data.Length;
-            } while (count > data.Length);
+            } while (count >= data.Length);
             fs.Flush();
             fs.Close();
         }

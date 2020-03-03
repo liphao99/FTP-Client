@@ -35,6 +35,8 @@ namespace FTPUtil
             int dataPort = int.Parse(datas[4]) * 256 + int.Parse(datas[5]);
 
             Connect(ref dataSocket, serverHost, dataPort);
+
+            KeepConnect();
         }
 
         public FTP(String serverHost, int portInt):this(serverHost, portInt, "anonymous", "anonymous"){}
@@ -106,12 +108,30 @@ namespace FTPUtil
             socket.Connect(endpoint);
         }
 
+        /// <summary>
+        /// 保持链接，每隔10s发送一个空指令
+        /// </summary>
+        private void KeepConnect()
+        {
+            Thread thread = new Thread(() =>
+            {
+                while (true)
+                {
+                    Thread.Sleep(10000);
+                    Send("NOOP");
+                    ReadControlPort();
+                }
+            });
+            thread.Start();
+        }
+
         public static void Main()
         {
             FTP ftp = new FTP("192.168.1.4", 21);
-            ICommand cmd = new DownloadCommand(ftp,"\\test.txt","D:\\");
+            ICommand cmd = new DownloadCommand(ftp,"\\HW1.pdf","D:\\");
             cmd.Execute();
             Console.Write(cmd.GetReply());
+            Thread.Sleep(100000);
         }
     }
 }
