@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace FTPUtil
 {
+    /// <summary>
+    /// 只需要单条指令且不需要使用数据端口的简单命令类
+    /// </summary>
     public class SingleCommand:ICommand
     {
         private FTP ftp;

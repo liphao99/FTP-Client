@@ -18,6 +18,20 @@ namespace FTPUtil
 
         private String serverHost;
 
+        //线程锁
+        private Object sendLock = new Object();
+        private Object controlPortLock = new Object();
+        private Object dataPortLock = new Object();
+
+        private bool dataPortOpen = false;
+
+        /// <summary>
+        /// 建立ftp链接
+        /// </summary>
+        /// <param name="serverHost">服务器ip地址</param>
+        /// <param name="portInt">服务器控制端口号</param>
+        /// <param name="user">用户名</param>
+        /// <param name="password">用户密码</param>
         public FTP(String serverHost, int portInt, String user, String password)
         {
             this.serverHost = serverHost;
@@ -27,18 +41,13 @@ namespace FTPUtil
             ReadControlPort();
             Send("PASS anonymous");
             ReadControlPort();
-
-            //默认进入被动模式
-            Send("PASV");
-            String dataSocketMessage = ReadControlPort();
-            String[] datas = dataSocketMessage.Split('(')[1].Split(')')[0].Split(',');
-            int dataPort = int.Parse(datas[4]) * 256 + int.Parse(datas[5]);
-
-            Connect(ref dataSocket, serverHost, dataPort);
-
+            
             KeepConnect();
         }
 
+        /// <summary>
+        /// 匿名建立ftp链接
+        /// </summary>
         public FTP(String serverHost, int portInt):this(serverHost, portInt, "anonymous", "anonymous"){}
 
         /// <summary>
@@ -46,8 +55,12 @@ namespace FTPUtil
         /// </summary>
         internal void Send(String order)
         {
-            byte[] bytes = Encoding.Default.GetBytes((order + "\r\n").ToCharArray());
-            controlSocket.Send(bytes, bytes.Length, 0);
+            lock (sendLock)
+            {
+                Console.WriteLine(order);
+                byte[] bytes = Encoding.Default.GetBytes((order + "\r\n").ToCharArray());
+                controlSocket.Send(bytes, bytes.Length, 0);
+            }
         }
 
         /// <summary>
@@ -56,15 +69,42 @@ namespace FTPUtil
         internal String ReadControlPort()
         {
             String reply = String.Empty;
-            Thread.Sleep(200);
-            byte[] buffer = new byte[1024];
-            int count;
-            do
+            lock (controlPortLock)
             {
-                count = controlSocket.Receive(buffer, buffer.Length, 0);
-                reply += Encoding.UTF8.GetString(buffer, 0, count);
-            } while (count >= buffer.Length);
+                byte[] buffer = new byte[1024];
+                int count;
+                do
+                {
+                    count = controlSocket.Receive(buffer, buffer.Length, 0);
+                    reply += Encoding.UTF8.GetString(buffer, 0, count);
+                } while (count >= buffer.Length);
+            }
+            Console.Write(reply);
             return reply;
+        }
+
+        /// <summary>
+        /// 通过被动模式建立数据端口连接
+        /// </summary>
+        internal void ConnectDataPortByPASV()
+        {
+            lock (sendLock)
+            {
+                Send("PASV");
+                String dataSocketMessage = ReadControlPort();
+                String[] datas = dataSocketMessage.Split('(')[1].Split(')')[0].Split(',');
+                int dataPort = int.Parse(datas[4]) * 256 + int.Parse(datas[5]);
+
+                Connect(ref dataSocket, serverHost, dataPort);
+                dataPortOpen = true;
+            }
+        }
+
+        internal void CloseDataPort()
+        {
+            if (!dataPortOpen) return;
+            dataSocket.Close();
+            dataPortOpen = false;
         }
 
         /// <summary>
@@ -72,24 +112,28 @@ namespace FTPUtil
         /// </summary>
         internal String ReadDataPortAsString()
         {
+            if (!dataPortOpen) return null;
             String reply = String.Empty;
-            //Thread.Sleep(200);
             byte[] buffer = new byte[1024];
             int count;
-            do
+            lock (dataPortLock)
             {
-                count = dataSocket.Receive(buffer, buffer.Length, 0);
-                reply += Encoding.UTF8.GetString(buffer, 0, count);
-            } while (count >= buffer.Length);
+                do
+                {
+                    count = dataSocket.Receive(buffer, buffer.Length, 0);
+                    reply += Encoding.UTF8.GetString(buffer, 0, count);
+                } while (count >= buffer.Length);
+            }
             return reply;
         }
 
         /// <summary>
         /// 从客户端的数据端口读消息，并返回字节流
         /// </summary>
-        internal byte[] ReadDataPortAsByte(ref int count)
+        internal byte[] ReadDataPort(ref int count)
         {
-            byte[] buffer = new byte[1024];
+            if (!dataPortOpen) return null;
+            byte[] buffer = new byte[1048576];//1MB
             count = dataSocket.Receive(buffer, buffer.Length, 0);
             return buffer;
         }
@@ -118,19 +162,31 @@ namespace FTPUtil
                 while (true)
                 {
                     Thread.Sleep(10000);
-                    Send("NOOP");
-                    ReadControlPort();
+                    SendNoop();
                 }
             });
             thread.Start();
         }
 
+        private void SendNoop()
+        {
+            lock (sendLock)
+            {
+                Send("NOOP");
+                ReadControlPort();
+            }
+        }
+
         public static void Main()
         {
             FTP ftp = new FTP("192.168.1.4", 21);
-            ICommand cmd = new DownloadCommand(ftp,"\\HW1.pdf","D:\\");
-            cmd.Execute();
-            Console.Write(cmd.GetReply());
+            TransferCommand cmd = new DownloadCommand(ftp,"\\HW1.pdf","D:\\");
+            Thread thread = new Thread(new ThreadStart(cmd.Execute));
+            //cmd.Execute();
+            thread.Start();
+
+            Thread.Sleep(100);
+            cmd.Abort();
             Thread.Sleep(100000);
         }
     }
