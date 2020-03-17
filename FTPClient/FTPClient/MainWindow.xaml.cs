@@ -47,7 +47,7 @@ namespace FTPClient
         {
 
             // Get every logical drive on the machine
-            /*foreach (var drive in Directory.GetLogicalDrives())
+            foreach (var drive in Directory.GetLogicalDrives())
             {
                 // Creat a new item for it
                 var item = new TreeViewItem()
@@ -66,25 +66,25 @@ namespace FTPClient
 
                 // Add it to the main treeView
                 FolderView.Items.Add(item);
-            }*/
+            }
            // var drive = "ftp://192.168.139.1/";  
-            var drive = "C:\\";
-            var item = new TreeViewItem()
-            {
-                // Set the header and the full path
-                Header = drive,
-                Tag = drive
-            };
+            //var drive = "C:\\";
+            //var item = new TreeViewItem()
+            //{
+            //    // Set the header and the full path
+            //    Header = drive,
+            //    Tag = drive
+            //};
 
 
-            // Add a dummy item
-            item.Items.Add(null);
+            //// Add a dummy item
+            //item.Items.Add(null);
 
-            // Listen out for item being expanded
-            item.Expanded += Folder_Expanded;
+            //// Listen out for item being expanded
+            //item.Expanded += Folder_Expanded;
 
-            // Add it to the main treeView
-            FolderView.Items.Add(item);
+            //// Add it to the main treeView
+            //FolderView.Items.Add(item);
         }
 
         #endregion
@@ -223,8 +223,10 @@ namespace FTPClient
 
         private void conBtn(object sender, RoutedEventArgs e)//连接按钮
         {
+            string usrname = name.Text.ToString();
+            string password = psw.Password; 
             string port = portNum.Text.ToString();
-            MessageBox.Show(port);
+            MessageBox.Show(port+usrname+password);
         }
 
         private void upClick(object sender, RoutedEventArgs e)//上传按钮
