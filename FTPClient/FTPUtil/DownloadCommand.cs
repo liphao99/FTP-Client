@@ -24,7 +24,7 @@ namespace FTPUtil
         /// <summary>
         /// 中断下载，并返回下载断点续传类
         /// </summary>
-        public override ICommand Abort()
+        public override Command Abort()
         {
             lock (lockObj)
             {

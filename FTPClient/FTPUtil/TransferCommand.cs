@@ -9,7 +9,7 @@ namespace FTPUtil
     /// <summary>
     /// 文件传输类，派生出上传、下载和对应的两个断点续传类
     /// </summary>
-    public abstract class TransferCommand : ICommand
+    public abstract class TransferCommand : Command
     {
         //需要绝对路径
         public String Source { get; set; }
@@ -34,6 +34,6 @@ namespace FTPUtil
         /// 暂停，返回断点重续对象
         /// </summary>
         /// <returns>该传输命令对应的断点传输命令对象</returns>
-        public abstract ICommand Abort(); 
+        public abstract Command Abort(); 
     }
 }

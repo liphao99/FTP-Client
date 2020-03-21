@@ -133,7 +133,7 @@ namespace FTPUtil
         internal byte[] ReadDataPort(ref int count)
         {
             if (!dataPortOpen) return null;
-            byte[] buffer = new byte[1048576];//1MB
+            byte[] buffer = new byte[102400];//100kb
             count = dataSocket.Receive(buffer, buffer.Length, 0);
             return buffer;
         }
@@ -180,13 +180,14 @@ namespace FTPUtil
         public static void Main()
         {
             FTP ftp = new FTP("192.168.1.4", 21);
-            TransferCommand cmd = new DownloadCommand(ftp,"\\HW1.pdf","D:\\");
-            Thread thread = new Thread(new ThreadStart(cmd.Execute));
+            //TransferCommand cmd = new DownloadCommand(ftp,"\\HW1.pdf","D:\\");
+            //Thread thread = new Thread(new ThreadStart(cmd.Execute));
             //cmd.Execute();
-            thread.Start();
-
+            //thread.Start();
+            Command ic = new ListCommand(ftp, "/");
+            ic.Execute();
             Thread.Sleep(100);
-            cmd.Abort();
+            //cmd.Abort();
             Thread.Sleep(100000);
         }
     }

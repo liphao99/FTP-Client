@@ -15,7 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using FTPUtil;
 namespace FTPClient
 {
 
@@ -216,6 +216,10 @@ namespace FTPClient
         }
         #endregion
 
+        private FTP folderFtp;
+        private FTP mainFtp;
+
+
         private void portNum_TextInput(object sender, TextCompositionEventArgs e)
         {
 
@@ -223,9 +227,21 @@ namespace FTPClient
 
         private void conBtn(object sender, RoutedEventArgs e)//连接按钮
         {
+            //todo:缺了服务器ip
             string usrname = name.Text.ToString();
-            string password = psw.Password; 
+            string password = psw.Password;
             string port = portNum.Text.ToString();
+            if (usrname.Equals("") || password.Equals(""))
+            {
+                folderFtp = new FTP("192.168.1.4", Int32.Parse(port));
+                mainFtp = new FTP("192.168.1.4", Int32.Parse(port));
+            }
+            else
+            {
+                folderFtp = new FTP("192.168.1.4", Int32.Parse(port), usrname, password);
+                mainFtp = new FTP("192.168.1.4", Int32.Parse(port), usrname, password);
+            }
+            InitServerFolder();
             MessageBox.Show(port+usrname+password);
         }
 
@@ -277,5 +293,33 @@ namespace FTPClient
                 System.IO.Path.GetDirectoryName(fileDialog.FileName); //得到路径
             }
         }
+
+        private void InitServerFolder()
+        {
+            ListCommand cmd = new ListCommand(folderFtp, "/");
+            cmd.Execute();
+            foreach(List<String> dir in cmd.Directories)
+            {
+                TreeViewItem item = new TreeViewItem
+                {
+                    Header = dir[3],
+                    Tag = "/"+dir[3]
+                };
+                item.Items.Add(null);
+                //parent.Expanded += ;
+                ServerFolderView.Items.Add(item);
+            }
+            foreach(List<String> file in cmd.Files)
+            {
+                TreeViewItem item = new TreeViewItem
+                {
+                    Header = file[3],
+                    Tag = "/" + file[3]
+                };
+                ServerFolderView.Items.Add(item);
+            }
+        }
+
+
     }
 }

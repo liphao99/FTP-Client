@@ -95,7 +95,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\FTPUtil\FTPUtil.csproj">
+      <Project>{7f70b075-f18e-4889-8cc4-c4259f21813b}</Project>
+      <Name>FTPUtil</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\drive.png" />
     <Resource Include="Images\file.png" />
