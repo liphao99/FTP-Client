@@ -148,9 +148,8 @@ namespace FTPUtil
         /// <param name="port">端口号</param>
         internal void Connect(ref Socket socket,String serverHost,int port)
         {
-            IPHostEntry serverEntry = Dns.GetHostEntry(serverHost);
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint endpoint = new IPEndPoint(serverEntry.AddressList[1], port);//AddressList[1]存疑
+            IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(serverHost), port);
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);//AddressList[1]存疑
             socket.Connect(endpoint);
         }
 
