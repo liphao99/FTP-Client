@@ -294,6 +294,48 @@ namespace FTPClient
             }
         }
 
+        private void ServerFolder_Expanded(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("ServerFolder_Expanded");
+            TreeViewItem parent = (TreeViewItem)sender;
+
+            // If the item only contains the dummy data
+            if (parent.Items.Count != 1 || parent.Items[0] != null)
+                return;
+
+            // Clear the dummy data
+            parent.Items.Clear();
+
+            // Get folder name
+            String fullPath = (string)parent.Tag;
+
+            //todo:先试试同步的加载文件夹效果如何，不行再换多线程
+            ListCommand cmd = new ListCommand(folderFtp, fullPath);
+            cmd.Execute();
+            Console.WriteLine(cmd.Files.Count + cmd.Directories.Count);
+            foreach (List<String> dir in cmd.Directories)
+            {
+                TreeViewItem item = new TreeViewItem
+                {
+                    Header = dir[3],
+                    Tag = fullPath + "/" + dir[3]
+                };
+                item.Items.Add(null);
+                item.Expanded += ServerFolder_Expanded;
+                parent.Items.Add(item);
+            }
+            foreach (List<String> file in cmd.Files)
+            {
+                TreeViewItem item = new TreeViewItem
+                {
+                    Header = file[3],
+                    Tag = fullPath + "/" + file[3]
+                };
+                parent.Items.Add(item);
+            }
+
+        }
+
         private void InitServerFolder()
         {
             ListCommand cmd = new ListCommand(folderFtp, "/");
@@ -306,7 +348,7 @@ namespace FTPClient
                     Tag = "/"+dir[3]
                 };
                 item.Items.Add(null);
-                //parent.Expanded += ;
+                item.Expanded += ServerFolder_Expanded;
                 ServerFolderView.Items.Add(item);
             }
             foreach(List<String> file in cmd.Files)
@@ -320,6 +362,7 @@ namespace FTPClient
             }
         }
 
+        
 
     }
 }

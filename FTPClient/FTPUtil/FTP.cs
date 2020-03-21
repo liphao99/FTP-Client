@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -92,6 +93,7 @@ namespace FTPUtil
             {
                 Send("PASV");
                 String dataSocketMessage = ReadControlPort();
+                Console.WriteLine("connect by pasv:" + dataSocketMessage);
                 String[] datas = dataSocketMessage.Split('(')[1].Split(')')[0].Split(',');
                 int dataPort = int.Parse(datas[4]) * 256 + int.Parse(datas[5]);
 
@@ -185,6 +187,8 @@ namespace FTPUtil
             //cmd.Execute();
             //thread.Start();
             Command ic = new ListCommand(ftp, "/");
+            ic.Execute();
+            ic = new ListCommand(ftp, "/newD");
             ic.Execute();
             Thread.Sleep(100);
             //cmd.Abort();

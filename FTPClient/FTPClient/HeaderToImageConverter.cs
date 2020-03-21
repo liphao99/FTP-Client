@@ -32,6 +32,7 @@ namespace FTPClient
             var name = MainWindow.GetFileFolderName(path);
 
 
+            Console.WriteLine(name);
             // By default, we persume a file
             var image = "Images/file.png";
 

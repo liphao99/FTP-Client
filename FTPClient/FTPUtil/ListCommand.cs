@@ -54,6 +54,7 @@ namespace FTPUtil
                     Files.Add(item);
                 }
             }
+            reply = ftp.ReadControlPort();
         }
 
         public string GetReply()
