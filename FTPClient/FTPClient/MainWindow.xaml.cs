@@ -234,13 +234,13 @@ namespace FTPClient
             string port = portNum.Text.ToString();
             if (usrname.Equals("") || password.Equals(""))
             {
-                folderFtp = new FTP("192.168.1.4", Int32.Parse(port));
-                mainFtp = new FTP("192.168.1.4", Int32.Parse(port));
+                folderFtp = new FTP(host, Int32.Parse(port));
+                mainFtp = new FTP(host, Int32.Parse(port));
             }
             else
             {
-                folderFtp = new FTP("192.168.1.4", Int32.Parse(port), usrname, password);
-                mainFtp = new FTP("192.168.1.4", Int32.Parse(port), usrname, password);
+                folderFtp = new FTP(host, Int32.Parse(port), usrname, password);
+                mainFtp = new FTP(host, Int32.Parse(port), usrname, password);
             }
             InitServerFolder();
             MessageBox.Show(port+usrname+password);
