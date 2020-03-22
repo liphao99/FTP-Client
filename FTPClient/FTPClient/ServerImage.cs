@@ -10,14 +10,10 @@ using System.Windows.Media.Imaging;
 
 namespace FTPClient
 {
-    /// <summary>
-    /// Converts a full path to a specific image type of a drive, folder or file
-    /// </summary>
     [ValueConversion(typeof(string), typeof(BitmapImage))]
-
-    public class HeaderToImageConverter : IValueConverter
+    public class ServerImage:IValueConverter
     {
-        public static HeaderToImageConverter Instance = new HeaderToImageConverter();
+        public static ServerImage Instance = new ServerImage();
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -30,6 +26,8 @@ namespace FTPClient
 
             // Get the name of the file/folder
             var name = MainWindow.GetFileFolderName(path);
+            string ext = Path.GetExtension(path);
+            string fileName = Path.GetFileNameWithoutExtension(path);
 
             Console.WriteLine(name);
             // By default, we persume a file
@@ -40,18 +38,16 @@ namespace FTPClient
             if (string.IsNullOrEmpty(name))
                 image = "Images/drive.png";
             //else if (new FileInfo(path).Attributes.HasFlag(FileAttributes.Directory))
-            else if((fsi.Attributes&FileAttributes.Directory)==FileAttributes.Directory)
+            //else if ((fsi.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+            else if(ext==""||fileName=="")
                 image = "Images/folder.png";
 
             return new BitmapImage(new Uri($"pack://application:,,,/{image}"));
-
         }
-        
-
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return ((IValueConverter)Instance).ConvertBack(value, targetType, parameter, culture);
         }
     }
 }
