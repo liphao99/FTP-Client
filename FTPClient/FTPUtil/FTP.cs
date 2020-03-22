@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -92,6 +93,7 @@ namespace FTPUtil
             {
                 Send("PASV");
                 String dataSocketMessage = ReadControlPort();
+                Console.WriteLine("connect by pasv:" + dataSocketMessage);
                 String[] datas = dataSocketMessage.Split('(')[1].Split(')')[0].Split(',');
                 int dataPort = int.Parse(datas[4]) * 256 + int.Parse(datas[5]);
 
@@ -133,7 +135,7 @@ namespace FTPUtil
         internal byte[] ReadDataPort(ref int count)
         {
             if (!dataPortOpen) return null;
-            byte[] buffer = new byte[1048576];//1MB
+            byte[] buffer = new byte[102400];//100kb
             count = dataSocket.Receive(buffer, buffer.Length, 0);
             return buffer;
         }
@@ -146,9 +148,8 @@ namespace FTPUtil
         /// <param name="port">端口号</param>
         internal void Connect(ref Socket socket,String serverHost,int port)
         {
-            IPHostEntry serverEntry = Dns.GetHostEntry(serverHost);
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint endpoint = new IPEndPoint(serverEntry.AddressList[1], port);//AddressList[1]存疑
+            IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(serverHost), port);
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);//AddressList[1]存疑
             socket.Connect(endpoint);
         }
 
@@ -180,13 +181,16 @@ namespace FTPUtil
         public static void Main()
         {
             FTP ftp = new FTP("192.168.1.4", 21);
-            TransferCommand cmd = new DownloadCommand(ftp,"\\HW1.pdf","D:\\");
-            Thread thread = new Thread(new ThreadStart(cmd.Execute));
+            //TransferCommand cmd = new DownloadCommand(ftp,"\\HW1.pdf","D:\\");
+            //Thread thread = new Thread(new ThreadStart(cmd.Execute));
             //cmd.Execute();
-            thread.Start();
-
+            //thread.Start();
+            Command ic = new ListCommand(ftp, "/");
+            ic.Execute();
+            ic = new ListCommand(ftp, "/newD");
+            ic.Execute();
             Thread.Sleep(100);
-            cmd.Abort();
+            //cmd.Abort();
             Thread.Sleep(100000);
         }
     }

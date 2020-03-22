@@ -9,7 +9,7 @@ namespace FTPUtil
     /// <summary>
     /// 只需要单条指令且不需要使用数据端口的简单命令类
     /// </summary>
-    public class SingleCommand:ICommand
+    public class SingleCommand:Command
     {
         private FTP ftp;
         private String reply;

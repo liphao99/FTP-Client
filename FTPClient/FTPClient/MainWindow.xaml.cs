@@ -15,7 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using FTPUtil;
 namespace FTPClient
 {
 
@@ -216,6 +216,10 @@ namespace FTPClient
         }
         #endregion
 
+        private FTP folderFtp;
+        private FTP mainFtp;
+
+
         private void portNum_TextInput(object sender, TextCompositionEventArgs e)
         {
 
@@ -223,9 +227,22 @@ namespace FTPClient
 
         private void conBtn(object sender, RoutedEventArgs e)//连接按钮
         {
+            //todo:缺了服务器ip
+            string host = hostNum.Text.ToString();
             string usrname = name.Text.ToString();
-            string password = psw.Password; 
+            string password = psw.Password;
             string port = portNum.Text.ToString();
+            if (usrname.Equals("") || password.Equals(""))
+            {
+                folderFtp = new FTP("192.168.1.4", Int32.Parse(port));
+                mainFtp = new FTP("192.168.1.4", Int32.Parse(port));
+            }
+            else
+            {
+                folderFtp = new FTP("192.168.1.4", Int32.Parse(port), usrname, password);
+                mainFtp = new FTP("192.168.1.4", Int32.Parse(port), usrname, password);
+            }
+            InitServerFolder();
             MessageBox.Show(port+usrname+password);
         }
 
@@ -277,5 +294,76 @@ namespace FTPClient
                 System.IO.Path.GetDirectoryName(fileDialog.FileName); //得到路径
             }
         }
+
+        private void ServerFolder_Expanded(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("ServerFolder_Expanded");
+            TreeViewItem parent = (TreeViewItem)sender;
+
+            // If the item only contains the dummy data
+            if (parent.Items.Count != 1 || parent.Items[0] != null)
+                return;
+
+            // Clear the dummy data
+            parent.Items.Clear();
+
+            // Get folder name
+            String fullPath = (string)parent.Tag;
+
+            //todo:先试试同步的加载文件夹效果如何，不行再换多线程
+            ListCommand cmd = new ListCommand(folderFtp, fullPath);
+            cmd.Execute();
+            Console.WriteLine(cmd.Files.Count + cmd.Directories.Count);
+            foreach (List<String> dir in cmd.Directories)
+            {
+                TreeViewItem item = new TreeViewItem
+                {
+                    Header = dir[3],
+                    Tag = fullPath + "/" + dir[3]
+                };
+                item.Items.Add(null);
+                item.Expanded += ServerFolder_Expanded;
+                parent.Items.Add(item);
+            }
+            foreach (List<String> file in cmd.Files)
+            {
+                TreeViewItem item = new TreeViewItem
+                {
+                    Header = file[3],
+                    Tag = fullPath + "/" + file[3]
+                };
+                parent.Items.Add(item);
+            }
+
+        }
+
+        private void InitServerFolder()
+        {
+            ListCommand cmd = new ListCommand(folderFtp, "/");
+            cmd.Execute();
+            foreach(List<String> dir in cmd.Directories)
+            {
+                TreeViewItem item = new TreeViewItem
+                {
+                    Header = dir[3],
+                    Tag = "/"+dir[3]
+                };
+                item.Items.Add(null);
+                item.Expanded += ServerFolder_Expanded;
+                ServerFolderView.Items.Add(item);
+            }
+            foreach(List<String> file in cmd.Files)
+            {
+                TreeViewItem item = new TreeViewItem
+                {
+                    Header = file[3],
+                    Tag = "/" + file[3]
+                };
+                ServerFolderView.Items.Add(item);
+            }
+        }
+
+        
+
     }
 }

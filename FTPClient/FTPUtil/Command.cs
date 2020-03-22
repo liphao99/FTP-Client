@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FTPUtil
 {
-    public interface ICommand
+    public interface Command
     {
         void Execute();
         
