@@ -228,6 +228,7 @@ namespace FTPClient
         private void conBtn(object sender, RoutedEventArgs e)//连接按钮
         {
             //todo:缺了服务器ip
+            string host = hostNum.Text.ToString();
             string usrname = name.Text.ToString();
             string password = psw.Password;
             string port = portNum.Text.ToString();

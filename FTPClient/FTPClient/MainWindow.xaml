@@ -87,12 +87,14 @@
 			</TabItem>
 		</TabControl>
 		<Label x:Name="nameLabel" Content="用户名："  Margin="10,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="58"/>
-		<TextBox x:Name="name"  Margin="68,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="80" MaxHeight="25" VerticalContentAlignment="Center"/>
-		<Label x:Name="pswLabel" Content="密码："  Margin="150,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="58"/>
+		<TextBox x:Name="name"  Margin="60,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="80" MaxHeight="25" VerticalContentAlignment="Center"/>
+		<Label x:Name="pswLabel" Content="密码："  Margin="145,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="58"/>
 		<PasswordBox x:Name="psw" Margin="185,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="80" MaxHeight="25" VerticalContentAlignment="Center"/>
-		<Label x:Name="portLabel" Content="端口号："  Margin="265,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="58"/>
-		<TextBox x:Name="portNum"  Margin="315,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="160" MaxHeight="25" VerticalContentAlignment="Center"/>
-		<Button x:Name="connectBtn" Content="连接" Margin ="485,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height ="25" Width="42" BorderBrush="#6699ff" Foreground="#FF0A52A0" Click="conBtn">
+        <Label x:Name="hostLabel" Content="主机号："  Margin="270,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="58"/>
+        <TextBox x:Name="hostNum"  Margin="320,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="160" MaxHeight="25" VerticalContentAlignment="Center"/>
+        <Label x:Name="portLabel" Content="端口号："  Margin="485,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="58"/>
+		<TextBox x:Name="portNum"  Margin="535,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="60" MaxHeight="25" VerticalContentAlignment="Center"/>
+		<Button x:Name="connectBtn" Content="连接" Margin ="610,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height ="25" Width="42" BorderBrush="#6699ff" Foreground="#FF0A52A0" Click="conBtn">
 			<Button.Template >
 				<ControlTemplate TargetType="{x:Type Button}" >
 					<Border BorderBrush="{TemplateBinding Control.BorderBrush}" BorderThickness="2" CornerRadius="7,7,7,7">
