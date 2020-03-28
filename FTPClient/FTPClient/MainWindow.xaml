@@ -71,7 +71,7 @@
                                            Source="{Binding RelativeSource=
                                                 {RelativeSource Mode=FindAncestor, AncestorType= 
                                                 {x:Type TreeViewItem}},Path=Tag, 
-                                                Converter={x:Static local:HeaderToImageConverter.Instance}}"/>
+                                                Converter={x:Static local:ServerImage.Instance}}"/>
 												<TextBlock VerticalAlignment="Center" Text="{Binding}"/>
 											</StackPanel>
 										</DataTemplate>
