@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FTPUtil
 {
-    class UploadCommand : TransferCommand
+    public class UploadCommand : TransferCommand
     {
 
         private Object lockObj = new Object();
@@ -15,8 +15,8 @@ namespace FTPUtil
         /// 构造函数
         /// </summary>
         /// <param name="ftp">FTP链接</param>
-        /// <param name="source">准备上传文件的绝对地址</param>
-        /// <param name="destination">上传的目标目录，以 \ 结尾</param>
+        /// <param name="source">准备上传文件的绝对路径, 如C:/Myfiles/file.txt</param>
+        /// <param name="destination">上传的目标路径</param>
         public UploadCommand(FTP ftp, String source, String destination)
         {
             this.ftp = ftp;
@@ -24,49 +24,50 @@ namespace FTPUtil
             this.Destination = destination;
         }
 
-        public bool IsDestExist()
-        {
-
-            return false;
-        }
-        /// <summary>
-        /// 中断上传，记录
-        /// </summary>
-        /// <returns></returns>
-        public override ICommand Abort()
+        public override Command Abort()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// 将目标文件发送到服务端
+        /// </summary>
         public override void Execute()
         {
-            String fileName = Source.Split('\\').Last();
-            lock (lockObj)
+            /* ftp已经初始化，利用ftp进行文件传输
+            * 首先得到本地文件
+            * 通过连接进行IO写入
+            */
+            String[] dirArr = this.Source.Split('/');
+            String fileName = dirArr[dirArr.Length - 1];
+            try
             {
-                ftp.Send("STOR " + Source);
-                String num = ftp.ReadControlPort().Split(' ').Last();
-                Size = int.Parse(num);
-                ftp.ConnectDataPortByPASV();
+                ftp.Send("CWD " + Destination + "\r\n");
                 reply = ftp.ReadControlPort();
+                if (!reply.Equals("250"))
+                {
+                    throw new Exception("Exception occurs!");
+                }
+                ftp.Send("STOR " + fileName + "\r\n");
+                reply = ftp.ReadControlPort();
+                if (!reply.Equals("150"))
+                {
+                    throw new Exception("Exception occurs!");
+                }
+                //TODO: 读取本地文件内容，并写入服务端
+
             }
-            FileStream fs = new FileStream(Destination + fileName, FileMode.Create);
-            int count = 0;
-            byte[] data;
-            do
+            catch(IOException e)
             {
-                data = ftp.ReadDataPort(ref count);
-                fs.Write(data, 0, data.Length);
-                Point += data.Length;  //设置检查点
-            } while (count >= data.Length);
-            reply = ftp.ReadControlPort();
-            ftp.CloseDataPort();
-            fs.Flush();
-            fs.Close(); 
+                Console.WriteLine(e.Message);
+            }
         }
 
         public override string GetReply()
         {
             return this.reply;
         }
+
+        
     }
 }

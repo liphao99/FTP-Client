@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace FTPUtil
 {
-    class UploadContinue : TransferCommand
+    public class UploadContinue : TransferCommand
     {
-        public override ICommand Abort()
+        public override Command Abort()
         {
             throw new NotImplementedException();
         }
