@@ -54,8 +54,13 @@ namespace FTPUtil
                 {
                     throw new Exception("Exception occurs!");
                 }
-                //TODO: 读取本地文件内容，并写入服务端
-
+                //读取本地文件
+                FileStream fs = new FileStream(Source, FileMode.Open, FileAccess.Read);
+                byte[] buffer = new byte[fs.Length];
+                fs.Read(buffer, 0, (int)fs.Length);
+                fs.Close();
+                ftp.ConnectDataPortByPASV();
+                //TODO: 通过data port传输buffer
             }
             catch(IOException e)
             {

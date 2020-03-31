@@ -140,6 +140,8 @@ namespace FTPUtil
             return buffer;
         }
 
+
+
         /// <summary>
         /// 建立socket连接
         /// </summary>
