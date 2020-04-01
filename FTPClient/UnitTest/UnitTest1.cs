@@ -10,8 +10,8 @@ namespace UnitTest
         public void TestExecute()
         {
             FTP ftp = new FTP("192.168.1.105", 21); //命令端口
-            UploadCommand uploadCommand = new UploadCommand(ftp, "x", "D:/ftp");
-
+            UploadCommand uploadCommand = new UploadCommand(ftp, "D:/Games/Screenshots/test.png", "");
+            uploadCommand.Execute();            
         }
     }
 }

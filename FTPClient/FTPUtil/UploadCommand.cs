@@ -37,34 +37,44 @@ namespace FTPUtil
             /* ftp已经初始化，利用ftp进行文件传输
             * 首先得到本地文件
             * 通过连接进行IO写入
+            * 清理资源
             */
             String[] dirArr = this.Source.Split('/');
             String fileName = dirArr[dirArr.Length - 1];
+            ftp.ConnectDataPortByPASV();
+            ftp.Send("CWD " + Destination + "\r\n");
+            reply = ftp.ReadControlPort();
+            Console.WriteLine(reply);
+            //if (!reply.Equals("250"))
+            //{
+            //    throw new Exception("Exception occurs!");
+            //}
+
+            ftp.Send("STOR " + fileName + "\r\n");
+            reply = ftp.ReadControlPort();
+            Console.WriteLine(reply);
+            //if (!reply.Equals("150"))
+            //{
+            //    throw new Exception("Exception occurs!");
+            //}
+            //读取本地文件
+            FileStream fs = new FileStream(Source, FileMode.Open, FileAccess.Read);
             try
             {
-                ftp.Send("CWD " + Destination + "\r\n");
-                reply = ftp.ReadControlPort();
-                if (!reply.Equals("250"))
-                {
-                    throw new Exception("Exception occurs!");
-                }
-                ftp.Send("STOR " + fileName + "\r\n");
-                reply = ftp.ReadControlPort();
-                if (!reply.Equals("150"))
-                {
-                    throw new Exception("Exception occurs!");
-                }
-                //读取本地文件
-                FileStream fs = new FileStream(Source, FileMode.Open, FileAccess.Read);
                 byte[] buffer = new byte[fs.Length];
                 fs.Read(buffer, 0, (int)fs.Length);
-                fs.Close();
-                ftp.ConnectDataPortByPASV();
                 //TODO: 通过data port传输buffer
+                ftp.WriteDataPort(buffer);
+
             }
             catch(IOException e)
             {
                 Console.WriteLine(e.Message);
+            }
+            finally
+            {
+                fs.Close();
+                ftp.CloseDataPort();
             }
         }
 
