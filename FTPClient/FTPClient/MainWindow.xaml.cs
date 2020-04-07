@@ -16,14 +16,26 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using FTPUtil;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
+
 namespace FTPClient
 {
+
+    //public class Upload_files
+    //{
+    //    public string Name;
+    //    public double Size;
+    //    public int Percentage;
+    //}
 
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
     public partial class MainWindow : Window
     {
+        //public ObservableCollection<Upload_files> Upload_files_list = new ObservableCollection<Upload_files>();
+
         #region Constructor
 
         /// <summary>
@@ -31,8 +43,8 @@ namespace FTPClient
         /// </summary>
         public MainWindow()
         {
-            InitializeComponent();
-
+            InitializeComponent();            
+          
         }
         #endregion
 
@@ -67,7 +79,7 @@ namespace FTPClient
                 // Add it to the main treeView
                 FolderView.Items.Add(item);
             }
-           // var drive = "ftp://192.168.139.1/";  
+            // var drive = "ftp://192.168.139.1/";  
             //var drive = "C:\\";
             //var item = new TreeViewItem()
             //{
@@ -85,6 +97,12 @@ namespace FTPClient
 
             //// Add it to the main treeView
             //FolderView.Items.Add(item);
+            
+            //listView.Items.Add(new File("OverWarch", 1120, 5.0));
+            //ListViewItem[] lvs = new ListViewItem[2];
+            //lvs[0] = new ListViewItem ();
+            //lvs[1] = new ListViewItem();
+            //this.listView.Items.Add(lvs);
         }
 
         #endregion
@@ -218,7 +236,7 @@ namespace FTPClient
 
         private FTP folderFtp;
         private FTP mainFtp;
-
+        
 
         private void portNum_TextInput(object sender, TextCompositionEventArgs e)
         {
@@ -264,16 +282,42 @@ namespace FTPClient
                 System.IO.Path.GetDirectoryName(fileDialog.FileName); //得到路径
             }
 
+            this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
+            //Upload_files_list.Add(new Upload_files
+            //{
+            //    Name = fileDialog.FileName,
+            //    Size = 50,
+            //    Percentage = 50
+            //});
+
             //System.Windows.Forms.FolderBrowserDialog folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             //if(folderBrowser.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             //{
             //    MessageBox.Show(folderBrowser.SelectedPath);
             //}
+
         }
 
         private void turnBack(object sender, RoutedEventArgs e)//返回上级目录
         {
 
+        }
+
+        private void Item_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            File clickedItem = button.DataContext as File;
+
+            if (button.Content.ToString() == "开始")
+            {
+                button.Content = "暂停";
+                clickedItem.Percentage += 10;
+            }            
+            else if (button.Content.ToString() == "暂停")
+            {
+                button.Content = "开始";
+                clickedItem.Percentage -= 10;
+            }   
         }
 
         private void downClick(object sender, RoutedEventArgs e)
@@ -284,6 +328,7 @@ namespace FTPClient
             fileDialog.InitialDirectory = "ftp://192.168.139.1/";//打开服务器根目录
             //fileDialog.Filter=
             fileDialog.RestoreDirectory = true;
+            FileInfo fileInfo;
             if (fileDialog.ShowDialog() == true)
             {
                 //textBox1.Text = System.IO.Path.GetFileNameWithoutExtension(fileDialog.FileName);
@@ -292,7 +337,42 @@ namespace FTPClient
                 System.IO.Path.GetFileNameWithoutExtension(fileDialog.FileName); //文件名没有扩展名
                 System.IO.Path.GetFileName(fileDialog.FileName); //得到文件
                 System.IO.Path.GetDirectoryName(fileDialog.FileName); //得到路径
+                fileInfo = new FileInfo(fileDialog.FileName);
             }
+            this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
+
+        }
+        /// <summary>
+        /// 获取文件大小
+        /// </summary>
+        /// <param name="sFullName"></param>
+        /// <returns></returns>
+        public static long GetFileSize(string sFullName)
+        {
+            long lSize = 0;
+            lSize = new FileInfo(sFullName).Length;
+            return lSize;
+        }
+
+        /// <summary>
+        /// 计算文件大小函数(保留两位小数),Size为字节大小
+        /// </summary>
+        /// <param name="Size">初始文件大小</param>
+        /// <returns></returns>
+        public static string CountSize(long Size)
+        {
+            string m_strSize = "";
+            long FactSize = 0;
+            FactSize = Size;
+            if (FactSize < 1024.00)
+                m_strSize = FactSize.ToString("F2") + " Byte";
+            else if (FactSize >= 1024.00 && FactSize < 1048576)
+                m_strSize = (FactSize / 1024.00).ToString("F2") + " K";
+            else if (FactSize >= 1048576 && FactSize < 1073741824)
+                m_strSize = (FactSize / 1024.00 / 1024.00).ToString("F2") + " M";
+            else if (FactSize >= 1073741824)
+                m_strSize = (FactSize / 1024.00 / 1024.00 / 1024.00).ToString("F2") + " G";
+            return m_strSize;
         }
 
         private void ServerFolder_Expanded(object sender, RoutedEventArgs e)
@@ -363,7 +443,24 @@ namespace FTPClient
             }
         }
 
-        
 
+
+
+
+        private void updateLists()
+        {
+
+        }
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
+
+    
 }
