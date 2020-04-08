@@ -50,6 +50,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SingleCommand.cs" />
     <Compile Include="TransferCommand.cs" />
+    <Compile Include="UploadCommand.cs" />
+    <Compile Include="UploadContinue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

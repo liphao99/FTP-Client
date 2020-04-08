@@ -145,6 +145,19 @@ namespace FTPUtil
             return buffer;
         }
 
+        internal void WriteDataPort(byte[] buffer)
+        {
+            if (!dataPortOpen) throw new Exception("Data port isn't open");
+            try
+            {
+                dataSocket.Send(buffer, 0);
+            }catch(IOException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            //Port的开关在调用者处实现
+        }
+
         /// <summary>
         /// 建立socket连接
         /// </summary>
