@@ -232,18 +232,23 @@ namespace FTPClient
             string usrname = name.Text.ToString();
             string password = psw.Password;
             string port = portNum.Text.ToString();
-            if (usrname.Equals("") || password.Equals(""))
+            try
             {
-                folderFtp = new FTP(host, Int32.Parse(port));
-                mainFtp = new FTP(host, Int32.Parse(port));
-            }
-            else
+                if (usrname.Equals("") || password.Equals(""))
+                {
+                    folderFtp = new FTP(host, Int32.Parse(port));
+                    mainFtp = new FTP(host, Int32.Parse(port));
+                }
+                else
+                {
+                    folderFtp = new FTP(host, Int32.Parse(port), usrname, password);
+                    mainFtp = new FTP(host, Int32.Parse(port), usrname, password);
+                }
+                InitServerFolder();
+            }catch(Exception exception)
             {
-                folderFtp = new FTP(host, Int32.Parse(port), usrname, password);
-                mainFtp = new FTP(host, Int32.Parse(port), usrname, password);
+                MessageBox.Show(exception.Message);
             }
-            InitServerFolder();
-            MessageBox.Show(port+usrname+password);
         }
 
         private void upClick(object sender, RoutedEventArgs e)//上传按钮
@@ -341,6 +346,7 @@ namespace FTPClient
         {
             ListCommand cmd = new ListCommand(folderFtp, "/");
             cmd.Execute();
+            ServerFolderView.Items.Clear();
             foreach(List<String> dir in cmd.Directories)
             {
                 TreeViewItem item = new TreeViewItem

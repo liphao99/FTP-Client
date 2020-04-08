@@ -37,12 +37,17 @@ namespace FTPUtil
         {
             this.serverHost = serverHost;
             Connect(ref controlSocket, serverHost, portInt);
+            //todo:异常处理
             ReadControlPort();
-            Send("USER anonymous");
+            Send("USER "+user);
             ReadControlPort();
-            Send("PASS anonymous");
-            ReadControlPort();
-            
+            Send("PASS "+password);
+            String reply = ReadControlPort();
+            reply = reply.Split(' ')[0];
+            if (!reply.Equals("230"))
+            {
+                throw new Exception("登录失败！\n请检查用户名和密码");
+            }
             KeepConnect();
         }
 
