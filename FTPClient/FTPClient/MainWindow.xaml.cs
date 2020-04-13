@@ -79,7 +79,7 @@ namespace FTPClient
                 // Add it to the main treeView
                 FolderView.Items.Add(item);
             }
-            // var drive = "ftp://192.168.139.1/";  
+            //var drive = "ftp://192.168.139.1/";  
             //var drive = "C:\\";
             //var item = new TreeViewItem()
             //{
@@ -260,6 +260,7 @@ namespace FTPClient
             var node = FolderView.SelectedItem as TreeViewItem;
             string path = node.Tag.ToString();//选中文件的路径
             MessageBox.Show(path);
+            this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
         }
 
         //click to download
@@ -268,6 +269,7 @@ namespace FTPClient
             var node = ServerFolderView.SelectedItem as TreeViewItem;
             var path = node.Tag.ToString();//选中文件的路径
             MessageBox.Show(path);
+            this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
         }
 
         private FTP folderFtp;
@@ -294,7 +296,7 @@ namespace FTPClient
             MessageBox.Show(port+usrname+password);
         }
 
-        private void upClick(object sender, RoutedEventArgs e)//上传按钮
+        /*private void upClick(object sender, RoutedEventArgs e)//上传按钮
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Multiselect = true;
@@ -310,9 +312,10 @@ namespace FTPClient
                 System.IO.Path.GetFileNameWithoutExtension(fileDialog.FileName); //文件名没有扩展名
                 System.IO.Path.GetFileName(fileDialog.FileName); //得到文件
                 System.IO.Path.GetDirectoryName(fileDialog.FileName); //得到路径
+
+                this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
             }
 
-            this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
             //Upload_files_list.Add(new Upload_files
             //{
             //    Name = fileDialog.FileName,
@@ -325,7 +328,7 @@ namespace FTPClient
             //{
             //    MessageBox.Show(folderBrowser.SelectedPath);
             //}
-        }
+        }*/
 
         private void Item_Click(object sender, RoutedEventArgs e)
         {
@@ -344,12 +347,12 @@ namespace FTPClient
             }   
         }
 
-        private void downClick(object sender, RoutedEventArgs e)
+        /*private void downClick(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Multiselect = true;
             fileDialog.Title = "请选择要下载的文件";
-            fileDialog.InitialDirectory = "ftp://192.168.139.1/";//打开服务器根目录
+            fileDialog.InitialDirectory = "ftp://192.168.0.105/";//打开服务器根目录
             //fileDialog.Filter=
             fileDialog.RestoreDirectory = true;
             FileInfo fileInfo;
@@ -362,9 +365,11 @@ namespace FTPClient
                 System.IO.Path.GetFileName(fileDialog.FileName); //得到文件
                 System.IO.Path.GetDirectoryName(fileDialog.FileName); //得到路径
                 fileInfo = new FileInfo(fileDialog.FileName);
+
+                this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
             }
-            this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
-        }
+            
+        }*/
         /// <summary>
         /// 获取文件大小
         /// </summary>
@@ -466,10 +471,6 @@ namespace FTPClient
             }
         }
 
-        
-
-
-
         private void updateLists()
         {
 
@@ -486,6 +487,4 @@ namespace FTPClient
 
         
     }
-
-    
 }

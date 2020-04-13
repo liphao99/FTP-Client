@@ -59,7 +59,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!--上传下载按钮-->
+                    <!--上传下载按钮
                     <Button x:Name="upBtn" Content="上传" Margin ="13,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height ="25" Width="42" BorderBrush="#6699ff" Foreground="#FF0A52A0" Click="upClick">
                         <Button.Template >
                             <ControlTemplate TargetType="{x:Type Button}" >
@@ -84,9 +84,9 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-
+                    -->
                     <!--本地文件树-->
-                    <TreeView x:Name="FolderView" Margin="0,60,0.6,0.2" Grid.Column="0" Grid.ColumnSpan="4">
+                    <TreeView x:Name="FolderView" Margin="10,10,10,10" Grid.Column="0" Grid.ColumnSpan="4">
                         <TreeView.Resources>
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
@@ -110,7 +110,7 @@
                         </TreeView.ContextMenu>
                     </TreeView>
                     <!--服务器文件树-->
-                    <TreeView x:Name="ServerFolderView" Grid.Column="4" Margin="0.4,60,0,0.2">
+                    <TreeView x:Name="ServerFolderView" Grid.Column="4" Margin="10,10,10,10">
                         <TreeView.Resources>
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <Setter Property="HeaderTemplate">
