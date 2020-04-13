@@ -79,7 +79,7 @@ namespace FTPClient
                 // Add it to the main treeView
                 FolderView.Items.Add(item);
             }
-            // var drive = "ftp://192.168.139.1/";  
+            //var drive = "ftp://192.168.139.1/";  
             //var drive = "C:\\";
             //var item = new TreeViewItem()
             //{
@@ -234,14 +234,46 @@ namespace FTPClient
         }
         #endregion
 
+        //right click local file item show menu
+        private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var treeViewItem = VisualUpwardSearch<TreeViewItem>(e.OriginalSource as DependencyObject) as TreeViewItem;
+           if(treeViewItem != null)
+            {
+                treeViewItem.Focus();
+                e.Handled = true;
+            }
+        }
+
+        static DependencyObject VisualUpwardSearch<T>(DependencyObject source)
+        {
+            while(source != null && source.GetType() != typeof(T))
+            {
+                source = VisualTreeHelper.GetParent(source);
+            }
+            return source;
+        }
+
+        //click button in Menu to upload file to server
+        private void uptoServer_Click(object sender, RoutedEventArgs e)
+        {
+            var node = FolderView.SelectedItem as TreeViewItem;
+            string path = node.Tag.ToString();//选中文件的路径
+            MessageBox.Show(path);
+            this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
+        }
+
+        //click to download
+        private void downtoLocal_Click(object sender, RoutedEventArgs e)
+        {
+            var node = ServerFolderView.SelectedItem as TreeViewItem;
+            var path = node.Tag.ToString();//选中文件的路径
+            MessageBox.Show(path);
+            this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
+        }
+
         private FTP folderFtp;
         private FTP mainFtp;
-        
-
-        private void portNum_TextInput(object sender, TextCompositionEventArgs e)
-        {
-
-        }
 
         private void conBtn(object sender, RoutedEventArgs e)//连接按钮
         {
@@ -269,7 +301,7 @@ namespace FTPClient
             }
         }
 
-        private void upClick(object sender, RoutedEventArgs e)//上传按钮
+        /*private void upClick(object sender, RoutedEventArgs e)//上传按钮
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Multiselect = true;
@@ -285,9 +317,10 @@ namespace FTPClient
                 System.IO.Path.GetFileNameWithoutExtension(fileDialog.FileName); //文件名没有扩展名
                 System.IO.Path.GetFileName(fileDialog.FileName); //得到文件
                 System.IO.Path.GetDirectoryName(fileDialog.FileName); //得到路径
+
+                this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
             }
 
-            this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
             //Upload_files_list.Add(new Upload_files
             //{
             //    Name = fileDialog.FileName,
@@ -300,13 +333,7 @@ namespace FTPClient
             //{
             //    MessageBox.Show(folderBrowser.SelectedPath);
             //}
-
-        }
-
-        private void turnBack(object sender, RoutedEventArgs e)//返回上级目录
-        {
-
-        }
+        }*/
 
         private void Item_Click(object sender, RoutedEventArgs e)
         {
@@ -325,12 +352,12 @@ namespace FTPClient
             }   
         }
 
-        private void downClick(object sender, RoutedEventArgs e)
+        /*private void downClick(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Multiselect = true;
             fileDialog.Title = "请选择要下载的文件";
-            fileDialog.InitialDirectory = "ftp://192.168.139.1/";//打开服务器根目录
+            fileDialog.InitialDirectory = "ftp://192.168.0.105/";//打开服务器根目录
             //fileDialog.Filter=
             fileDialog.RestoreDirectory = true;
             FileInfo fileInfo;
@@ -343,10 +370,11 @@ namespace FTPClient
                 System.IO.Path.GetFileName(fileDialog.FileName); //得到文件
                 System.IO.Path.GetDirectoryName(fileDialog.FileName); //得到路径
                 fileInfo = new FileInfo(fileDialog.FileName);
-            }
-            this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
 
-        }
+                this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
+            }
+            
+        }*/
         /// <summary>
         /// 获取文件大小
         /// </summary>
@@ -401,7 +429,7 @@ namespace FTPClient
             Console.WriteLine(cmd.Files.Count + cmd.Directories.Count);
             foreach (List<String> dir in cmd.Directories)
             {
-                TreeViewItem item = new TreeViewItem
+                TreeViewItem item = new TreeViewItem()
                 {
                     Header = dir[3],
                     Tag = fullPath + "/" + dir[3]
@@ -412,7 +440,7 @@ namespace FTPClient
             }
             foreach (List<String> file in cmd.Files)
             {
-                TreeViewItem item = new TreeViewItem
+                TreeViewItem item = new TreeViewItem()
                 {
                     Header = file[3],
                     Tag = fullPath + "/" + file[3]
@@ -429,7 +457,7 @@ namespace FTPClient
             ServerFolderView.Items.Clear();
             foreach(List<String> dir in cmd.Directories)
             {
-                TreeViewItem item = new TreeViewItem
+                TreeViewItem item = new TreeViewItem()
                 {
                     Header = dir[3],
                     Tag = "/"+dir[3]
@@ -440,7 +468,7 @@ namespace FTPClient
             }
             foreach(List<String> file in cmd.Files)
             {
-                TreeViewItem item = new TreeViewItem
+                TreeViewItem item = new TreeViewItem()
                 {
                     Header = file[3],
                     Tag = "/" + file[3]
@@ -448,10 +476,6 @@ namespace FTPClient
                 ServerFolderView.Items.Add(item);
             }
         }
-
-
-
-
 
         private void updateLists()
         {
@@ -466,7 +490,7 @@ namespace FTPClient
         {
 
         }
-    }
 
-    
+        
+    }
 }

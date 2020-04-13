@@ -1,10 +1,11 @@
 ﻿<Window
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FTPClient"
-        xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" x:Class="FTPClient.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:FTPClient"
+    xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
+    x:Class="FTPClient.MainWindow"
         Loaded="Window_Loaded"
         mc:Ignorable="d"
         Title="MainWindow" Height="500" Width="800">
@@ -46,19 +47,19 @@
             </Setter>
         </Style>
     </Window.Resources>
+    
+    
     <Grid>
         <TabControl Margin="4,40.233,4.001,4" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="服务器端">
 
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="76*"/>
-                        <ColumnDefinition Width="11*"/>
-                        <ColumnDefinition Width="9*"/>
-                        <ColumnDefinition Width="294*"/>
-                        <ColumnDefinition Width="390*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="returnBtn" Content="&lt;&lt;返回上级目录" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Margin="13,33,0,0" BorderThickness="0" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF0F208A" FontWeight="SemiBold" Click="turnBack" Grid.ColumnSpan="4"/>
+
+                    <!--上传下载按钮
                     <Button x:Name="upBtn" Content="上传" Margin ="13,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height ="25" Width="42" BorderBrush="#6699ff" Foreground="#FF0A52A0" Click="upClick">
                         <Button.Template >
                             <ControlTemplate TargetType="{x:Type Button}" >
@@ -83,10 +84,12 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-
-                    <TreeView x:Name="FolderView" Margin="0,60,0.6,0.2" Grid.Column="0" Grid.ColumnSpan="4">
+                    -->
+                    <!--本地文件树-->
+                    <TreeView x:Name="FolderView" Margin="10,10,10,10" Grid.Column="0" Grid.ColumnSpan="4">
                         <TreeView.Resources>
                             <Style TargetType="{x:Type TreeViewItem}">
+                                <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
                                 <Setter Property="HeaderTemplate">
                                     <Setter.Value>
                                         <DataTemplate>
@@ -100,8 +103,14 @@
                                 </Setter>
                             </Style>
                         </TreeView.Resources>
+                        <TreeView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="上传" Name ="uptoServer" Click="uptoServer_Click"/>
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
                     </TreeView>
-                    <TreeView x:Name="ServerFolderView" Grid.Column="4" Margin="0.4,60,0,0.2">
+                    <!--服务器文件树-->
+                    <TreeView x:Name="ServerFolderView" Grid.Column="4" Margin="10,10,10,10">
                         <TreeView.Resources>
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <Setter Property="HeaderTemplate">
@@ -117,9 +126,15 @@
                                 </Setter>
                             </Style>
                         </TreeView.Resources>
+                        <TreeView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="下载" Name ="downtoLocal" Click="downtoLocal_Click"/>
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
                     </TreeView>
                 </Grid>
             </TabItem>
+            
             <TabItem Header="传输列表">
                 <Grid>
                     <ListView Grid.RowSpan="1" Margin="10,35,10,10.2" SelectionChanged="ListView_SelectionChanged" x:Name="listView" Style="{DynamicResource ListViewStyle_Customer}">
@@ -169,6 +184,7 @@
             </TabItem>
             <Label Content="Label" Height="100" Width="100"/>
         </TabControl>
+        
         <Label x:Name="nameLabel" Content="用户名："  Margin="10,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="58"/>
         <TextBox x:Name="name"  Margin="60,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="80" MaxHeight="25" VerticalContentAlignment="Center"/>
         <Label x:Name="pswLabel" Content="密码："  Margin="145,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" Width="58"/>
