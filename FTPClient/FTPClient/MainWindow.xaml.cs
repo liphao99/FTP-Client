@@ -18,9 +18,11 @@ using System.Windows.Shapes;
 using FTPUtil;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace FTPClient
 {
+
 
     //public class Upload_files
     //{
@@ -36,6 +38,19 @@ namespace FTPClient
     {
         //public ObservableCollection<Upload_files> Upload_files_list = new ObservableCollection<Upload_files>();
 
+        private FTP folderFtp;//用于浏览服务端文件
+        private FTP mainFtp;//用于文件传输
+
+        private Queue<TransferCommand> readyQueue;//准备开始传输的队列
+
+        private Queue<TransferCommand> waitingQueue;//暂停传输的队列
+        
+
+        private String currentFolder = null;//记录文件树中，最新展开的目录路径
+        private String currentServerFolder = null;//记录服务端文件树中，最新展开的目录路径
+
+        private ManualResetEvent manual;
+        private Thread transferThread;
         #region Constructor
 
         /// <summary>
@@ -43,8 +58,13 @@ namespace FTPClient
         /// </summary>
         public MainWindow()
         {
-            InitializeComponent();            
-          
+            readyQueue = new Queue<TransferCommand>();
+            waitingQueue = new Queue<TransferCommand>();
+            manual = new ManualResetEvent(false);
+            transferThread = new Thread(new ThreadStart(LoopTransfer));
+            transferThread.Start();
+
+            InitializeComponent();
         }
         #endregion
 
@@ -117,7 +137,7 @@ namespace FTPClient
             #region Initail Checks
 
             var item = (TreeViewItem)sender;
-
+            currentFolder = item.Tag.ToString();
             // If the item only contains the dummy data
             if (item.Items.Count != 1 || item.Items[0] != null)
                 return;
@@ -254,26 +274,87 @@ namespace FTPClient
             return source;
         }
 
+        private void LoopTransfer()
+        {
+            while (true)
+            {
+                if (readyQueue.Count == 0)
+                {
+                    Console.WriteLine("wait one");
+                    manual.WaitOne();
+                }
+                TransferCommand transfer = readyQueue.Peek();
+                Console.WriteLine("start transfer: " + transfer.Source);
+                transfer.Execute();
+                readyQueue.Dequeue();
+                //todo:移除传输界面的该项传输信息
+
+
+            }
+        }
+
         //click button in Menu to upload file to server
         private void uptoServer_Click(object sender, RoutedEventArgs e)
         {
-            var node = FolderView.SelectedItem as TreeViewItem;
-            string path = node.Tag.ToString();//选中文件的路径
-            MessageBox.Show(path);
-            this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
+            string path="";
+            try
+            {
+                var node = FolderView.SelectedItem as TreeViewItem;
+                path = node.Tag.ToString();//选中文件的路径
+            }catch(Exception excep)
+            {
+                MessageBox.Show(excep.Message);
+            }
+
+            if (currentServerFolder == null)
+            {
+                currentServerFolder = "/";
+            }
+            TransferCommand upload = new UploadCommand(mainFtp, path, currentServerFolder);
+            readyQueue.Enqueue(upload);
+            if(readyQueue.Count == 1)
+            {
+                manual.Set();
+                manual.Reset();
+            }
+            //todo:在传输队列视图中更新相关的控件
+
+
+
+            //MessageBox.Show(path);
+            //this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
         }
 
         //click to download
         private void downtoLocal_Click(object sender, RoutedEventArgs e)
         {
-            var node = ServerFolderView.SelectedItem as TreeViewItem;
-            var path = node.Tag.ToString();//选中文件的路径
-            MessageBox.Show(path);
-            this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
+            string path = "";
+            try
+            {
+                var node = ServerFolderView.SelectedItem as TreeViewItem;
+                path = node.Tag.ToString();//选中文件的路径
+            }catch(Exception excep)
+            {
+                MessageBox.Show(excep.Message);
+            }
+
+            if (currentFolder == null)
+            {
+                currentFolder = "C:\\";
+            }
+            TransferCommand download = new DownloadCommand(mainFtp, path, currentFolder);
+            readyQueue.Enqueue(download);
+            if (readyQueue.Count == 1)
+            {
+                manual.Set();
+                manual.Reset();
+            }
+            //todo:在传输队列视图中更新相关的控件
+
+            //MessageBox.Show(path);
+            //this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
         }
 
-        private FTP folderFtp;
-        private FTP mainFtp;
 
         private void conBtn(object sender, RoutedEventArgs e)//连接按钮
         {
@@ -410,13 +491,13 @@ namespace FTPClient
 
         private void ServerFolder_Expanded(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("ServerFolder_Expanded");
             TreeViewItem parent = (TreeViewItem)sender;
-
+            currentServerFolder = parent.ToString();
             // If the item only contains the dummy data
             if (parent.Items.Count != 1 || parent.Items[0] != null)
                 return;
 
+            
             // Clear the dummy data
             parent.Items.Clear();
 
@@ -426,7 +507,7 @@ namespace FTPClient
             //todo:先试试同步的加载文件夹效果如何，不行再换多线程
             ListCommand cmd = new ListCommand(folderFtp, fullPath);
             cmd.Execute();
-            Console.WriteLine(cmd.Files.Count + cmd.Directories.Count);
+            
             foreach (List<String> dir in cmd.Directories)
             {
                 TreeViewItem item = new TreeViewItem()
