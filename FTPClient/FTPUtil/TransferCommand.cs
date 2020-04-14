@@ -11,11 +11,14 @@ namespace FTPUtil
     /// </summary>
     public abstract class TransferCommand : Command
     {
-        //需要绝对路径
+        //需要绝对路径（含文件名）
         public String Source { get; set; }
 
         //需要绝对路径
         public String Destination { get; set; }
+
+        //传输文件名
+        public String FileName { get; protected set; }
 
         //文件大小，单位字节
         public int Size { get; protected set; }
@@ -24,8 +27,11 @@ namespace FTPUtil
         public int Point { get; protected set; }
 
 
+
         protected FTP ftp;
         protected String reply;
+
+        protected bool started = false;
 
         public abstract void Execute();
         public abstract string GetReply();

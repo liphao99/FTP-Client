@@ -10,7 +10,6 @@ namespace FTPUtil
     public class DownloadCommand :TransferCommand
     {
         private Object lockObj = new object();
-
         /// <param name="ftp">FTP链接</param>
         /// <param name="source">需要下载的文件的绝对路径</param>
         /// <param name="destination">将文件下载到哪个目录下，不包含文件名，如:"D:\\Download\"</param>
@@ -19,6 +18,10 @@ namespace FTPUtil
             this.ftp = ftp;
             Source = source;
             Destination = destination;
+            ftp.Send("SIZE " + Source);
+            String num = ftp.ReadControlPort().Split(' ').Last();
+            Size = int.Parse(num);
+            FileName = Source.Split('\\').Last();
         }
 
         /// <summary>
@@ -26,6 +29,10 @@ namespace FTPUtil
         /// </summary>
         public override Command Abort()
         {
+            if (!started)
+            {
+                return null;
+            }
             lock (lockObj)
             {
                 ftp.CloseDataPort();
@@ -41,18 +48,13 @@ namespace FTPUtil
         /// </summary>
         public override void Execute()
         {
-            String fileName;
             lock (lockObj)
             {
-                ftp.Send("SIZE " + Source);
-                String num = ftp.ReadControlPort().Split(' ').Last();
-                Size = int.Parse(num);
-                fileName = Source.Split('\\').Last();
                 ftp.ConnectDataPortByPASV();
                 ftp.Send("RETR " + Source);
                 reply = ftp.ReadControlPort();
             }
-            FileStream fs = new FileStream(Destination+fileName, FileMode.Create);
+            FileStream fs = new FileStream(Destination+FileName, FileMode.Create);
             int count = 0;
             byte[] data;
             do
