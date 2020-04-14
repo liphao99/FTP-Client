@@ -49,8 +49,8 @@ namespace FTPClient
         private String currentFolder = null;//记录文件树中，最新展开的目录路径
         private String currentServerFolder = null;//记录服务端文件树中，最新展开的目录路径
 
-        private ManualResetEvent manual;
-        private Thread transferThread;
+        private ManualResetEvent manual;//当传输队列为空时，使传输线程阻塞，节省资源的开销
+        private Thread transferThread;//传输线程
         #region Constructor
 
         /// <summary>
@@ -287,7 +287,7 @@ namespace FTPClient
                 Console.WriteLine("start transfer: " + transfer.Source);
                 transfer.Execute();
                 readyQueue.Dequeue();
-                //todo:移除传输界面的该项传输信息
+                //TODO:移除传输界面的该项传输信息
 
 
             }
@@ -317,7 +317,7 @@ namespace FTPClient
                 manual.Set();
                 manual.Reset();
             }
-            //todo:在传输队列视图中更新相关的控件
+            //TODO:在传输队列视图中更新相关的控件
 
 
 
@@ -349,7 +349,7 @@ namespace FTPClient
                 manual.Set();
                 manual.Reset();
             }
-            //todo:在传输队列视图中更新相关的控件
+            //TODO:在传输队列视图中更新相关的控件
 
             //MessageBox.Show(path);
             //this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
@@ -358,7 +358,6 @@ namespace FTPClient
 
         private void conBtn(object sender, RoutedEventArgs e)//连接按钮
         {
-            //todo:缺了服务器ip
             string host = hostNum.Text.ToString();
             string usrname = name.Text.ToString();
             string password = psw.Password;
@@ -504,7 +503,7 @@ namespace FTPClient
             // Get folder name
             String fullPath = (string)parent.Tag;
 
-            //todo:先试试同步的加载文件夹效果如何，不行再换多线程
+            //TODO:先试试同步的加载文件夹效果如何，不行再换多线程
             ListCommand cmd = new ListCommand(folderFtp, fullPath);
             cmd.Execute();
             
