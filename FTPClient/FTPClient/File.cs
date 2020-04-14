@@ -57,5 +57,13 @@ namespace FTPClient
             this.Percentage = percentage;
         }
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public override Boolean Equals(Object obj)
+        {
+            File other = (File)obj;
+            if (other.Name == this.Name)
+                return true;
+            return false;
+        }
     }
 }

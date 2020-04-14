@@ -20,6 +20,7 @@ using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Threading;
 
+
 namespace FTPClient
 {
 
@@ -44,6 +45,8 @@ namespace FTPClient
         private Queue<TransferCommand> readyQueue;//准备开始传输的队列
 
         private Queue<TransferCommand> waitingQueue;//暂停传输的队列
+
+        private List<File> files = new List<File>();//显示在传输列表中的文件
         
 
         private String currentFolder = null;//记录文件树中，最新展开的目录路径
@@ -287,11 +290,63 @@ namespace FTPClient
                 Console.WriteLine("start transfer: " + transfer.Source);
                 transfer.Execute();
                 readyQueue.Dequeue();
+                Console.WriteLine("将需要删除文件对应传输队列");
                 //TODO:移除传输界面的该项传输信息
+                string size = CountSize((long)transfer.Size);
+                //this.listView.Items.Remove();
+                File file = new File(transfer.Source,CountSize((long)transfer.Size),0);
+                //Thread thread = new Thread(new ParameterizedThreadStart(updateFiles));
+                //thread.Start(file);
+                //TaskScheduler taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+                Task.Factory.StartNew(()=>
+                {
+                    for (int i = 0; i < files.Count(); i++)
+                    {
+                        File f = files[i];
+                        if (f.Equals(file))
+                        {
+                            files.Remove(f);
+                            Console.WriteLine("removed file in list");
+                            listView.Dispatcher.Invoke(new Action(() =>
+                            {
+                                this.listView.Items.Remove(f);
 
+                            }));
+                            
+                            Console.WriteLine("removed file in listView" + f.Name);
+                        }
+                    }
+                    Thread.Sleep(500);
+                });
 
             }
         }
+        //线程方法，修改files和listView内容
+        /*private void updateFiles(Object obj)
+        {
+            File file = (File)obj;
+            Console.WriteLine("file in thread"+file.Name);
+
+            while (true)
+            {
+                Action action1 = () =>
+                  {
+                      for (int i = 0; i < files.Count(); i++)
+                      {
+                          Console.WriteLine("in for loop");
+                          File f = files[i];
+                          if (f.Equals(file))
+                          {
+                              files.Remove(f);
+                              Console.WriteLine("removed file"+f.Name);
+                              this.listView.Items.Remove(f);
+                              
+                          }
+                      }
+                  };
+                Thread.Sleep(500);
+            }
+        }*/
 
         //click button in Menu to upload file to server
         private void uptoServer_Click(object sender, RoutedEventArgs e)
@@ -317,7 +372,22 @@ namespace FTPClient
                 manual.Set();
                 manual.Reset();
             }
-            //TODO:在传输队列视图中更新相关的控件
+            //在传输队列视图中更新相关的控件
+            long size = (long)upload.Size;
+
+            File file = new File(path, CountSize(size), 0);
+            this.listView.Items.Add(file);
+            this.files.Add(file);
+            //for(int i=0;i<files.Count();i++)
+            //{
+            //    File f = files[i];
+            //    if (f.Equals(file))
+            //    {
+            //        files.Remove(f);
+            //        this.listView.Items.Remove(f);
+            //    }
+            //}
+
 
 
 
@@ -349,7 +419,9 @@ namespace FTPClient
                 manual.Set();
                 manual.Reset();
             }
-            //TODO:在传输队列视图中更新相关的控件
+            //在传输队列视图中更新相关的控件
+            long size = (long)download.Size;
+            this.listView.Items.Add(new File(path, CountSize(size), 0));
 
             //MessageBox.Show(path);
             //this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
