@@ -18,13 +18,11 @@ namespace FTPUtil
 
         public override void Execute()
         {
-            String[] dirArr = this.Source.Split('/');
-            String fileName = dirArr[dirArr.Length - 1];
             ftp.ConnectDataPortByPASV();
             ftp.Send("CWD " + Destination + "\r\n");
             reply = ftp.ReadControlPort();
             Console.WriteLine(reply);
-            ftp.Send("APPE" + fileName + "\r\n");
+            ftp.Send("APPE" + FileName + "\r\n");
             reply = ftp.ReadControlPort();
             //ftp.Send("STOR " + fileName + "\r\n");
             //reply = ftp.ReadControlPort();

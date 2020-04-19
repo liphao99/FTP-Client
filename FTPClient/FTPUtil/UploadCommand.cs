@@ -54,7 +54,7 @@ namespace FTPUtil
             * 通过连接进行IO写入
             * 清理资源
             */
-            String[] dirArr = this.Source.Split('/');
+            String[] dirArr = this.Source.Split('\\');
             String fileName = dirArr[dirArr.Length - 1];
             ftp.ConnectDataPortByPASV();
             ftp.Send("CWD " + Destination + "\r\n");
