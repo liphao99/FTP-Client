@@ -44,10 +44,11 @@ namespace FTPClient
 
         private Queue<TransferCommand> readyQueue;//准备开始传输的队列
 
-        private Queue<TransferCommand> waitingQueue;//暂停传输的队列
-
-        private List<File> files = new List<File>();//显示在传输列表中的文件
+        private List<TransferCommand> waitingList;//暂停传输的队列
         
+
+        private Dictionary<TransferCommand, File> cmd2file;
+        private Dictionary<File, TransferCommand> file2cmd;
 
         private String currentFolder = null;//记录文件树中，最新展开的目录路径
         private String currentServerFolder = null;//记录服务端文件树中，最新展开的目录路径
@@ -62,7 +63,9 @@ namespace FTPClient
         public MainWindow()
         {
             readyQueue = new Queue<TransferCommand>();
-            waitingQueue = new Queue<TransferCommand>();
+            waitingList = new List<TransferCommand>();
+            cmd2file = new Dictionary<TransferCommand, File>();
+            file2cmd = new Dictionary<File, TransferCommand>();
             manual = new ManualResetEvent(false);
             transferThread = new Thread(new ThreadStart(LoopTransfer));
             transferThread.Start();
@@ -291,34 +294,38 @@ namespace FTPClient
                 transfer.Execute();
                 readyQueue.Dequeue();
                 Console.WriteLine("将需要删除文件对应传输队列");
+
                 //TODO:移除传输界面的该项传输信息
                 string size = CountSize((long)transfer.Size);
                 //this.listView.Items.Remove();
-                File file = new File(transfer.Source,CountSize((long)transfer.Size),0, false);
+                File file = cmd2file[transfer];
+                cmd2file.Remove(transfer);
+                file2cmd.Remove(file);
+                listView.Dispatcher.Invoke(new Action(() =>
+                {
+                    this.listView.Items.Remove(file);
+
+                }));
                 //Thread thread = new Thread(new ParameterizedThreadStart(updateFiles));
                 //thread.Start(file);
                 //TaskScheduler taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
-                Task.Factory.StartNew(()=>
-                {
-                    Console.WriteLine("start to delete ui item");
-                    for (int i = 0; i < files.Count(); i++)
-                    {
-                        File f = files[i];
-                        if (f.Equals(file))
-                        {
-                            files.Remove(f);
-                            Console.WriteLine("removed file in list");
-                            listView.Dispatcher.Invoke(new Action(() =>
-                            {
-                                this.listView.Items.Remove(f);
-
-                            }));
+                //Task.Factory.StartNew(()=>
+                //{
+                //    Console.WriteLine("start to delete ui item");
+                //    for (int i = 0; i < files.Count(); i++)
+                //    {
+                //        File f = files[i];
+                //        if (f.Equals(file))
+                //        {
+                //            //files.Remove(f);
+                //            Console.WriteLine("removed file in list");
                             
-                            Console.WriteLine("removed file in listView" + f.Name);
-                        }
-                    }
-                    Thread.Sleep(500);
-                });
+                            
+                //            Console.WriteLine("removed file in listView" + f.Name);
+                //        }
+                //    }
+                //    Thread.Sleep(500);
+                //});
 
             }
         }
@@ -377,23 +384,9 @@ namespace FTPClient
             long size = (long)upload.Size;
 
             File file = new File(path, CountSize(size), 0, true);
+            file2cmd.Add(file, upload);
+            cmd2file.Add(upload, file);
             this.listView.Items.Add(file);
-            this.files.Add(file);
-            //for(int i=0;i<files.Count();i++)
-            //{
-            //    File f = files[i];
-            //    if (f.Equals(file))
-            //    {
-            //        files.Remove(f);
-            //        this.listView.Items.Remove(f);
-            //    }
-            //}
-
-
-
-
-            //MessageBox.Show(path);
-            //this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
         }
 
         //click to download
@@ -422,7 +415,10 @@ namespace FTPClient
             }
             //在传输队列视图中更新相关的控件
             long size = (long)download.Size;
-            this.listView.Items.Add(new File(path, CountSize(size), 0, false));
+            File file = new File(path, CountSize(size), 0, false);
+            file2cmd.Add(file, download);
+            cmd2file.Add(download, file);
+            this.listView.Items.Add(file);
 
             //MessageBox.Show(path);
             //this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
@@ -453,40 +449,7 @@ namespace FTPClient
                 MessageBox.Show(exception.Message);
             }
         }
-
-        /*private void upClick(object sender, RoutedEventArgs e)//上传按钮
-        {
-            OpenFileDialog fileDialog = new OpenFileDialog();
-            fileDialog.Multiselect = true;
-            fileDialog.Title = "请选择要上传的文件";
-            fileDialog.InitialDirectory = @"C:\";//设置打开目录的初始位置
-            //fileDialog.Filter=
-            fileDialog.RestoreDirectory = true;
-            if (fileDialog.ShowDialog() == true)
-            {
-                //textBox1.Text = System.IO.Path.GetFileNameWithoutExtension(fileDialog.FileName);
-                System.IO.Path.GetFullPath(fileDialog.FileName); //绝对路径
-                System.IO.Path.GetExtension(fileDialog.FileName); //文件扩展名
-                System.IO.Path.GetFileNameWithoutExtension(fileDialog.FileName); //文件名没有扩展名
-                System.IO.Path.GetFileName(fileDialog.FileName); //得到文件
-                System.IO.Path.GetDirectoryName(fileDialog.FileName); //得到路径
-
-                this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
-            }
-
-            //Upload_files_list.Add(new Upload_files
-            //{
-            //    Name = fileDialog.FileName,
-            //    Size = 50,
-            //    Percentage = 50
-            //});
-
-            //System.Windows.Forms.FolderBrowserDialog folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
-            //if(folderBrowser.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            //{
-            //    MessageBox.Show(folderBrowser.SelectedPath);
-            //}
-        }*/
+        
 
         private void Item_Click(object sender, RoutedEventArgs e)
         {
@@ -500,55 +463,22 @@ namespace FTPClient
             {
                 button.Content = "暂停";
                 clickedItem.Percentage += 10;
-                if (clickedItem.IsUpLoad)
-                {
-                    upLoadCommand.Execute();
-                }
-                else
-                {
-                    downLoadCommand.Execute();
-                }
+                TransferCommand cmd = file2cmd[clickedItem];
+                waitingList.Remove(cmd);
+                readyQueue.Enqueue(cmd);
             }            
             else if (button.Content.ToString() == "暂停")//暂停上传
             {
                 button.Content = "开始";
                 clickedItem.Percentage -= 10;
-                if (clickedItem.IsUpLoad)//文件正在被上传
-                {
-                    upLoadCommand = (upLoadCommand == null ? new UploadCommand(mainFtp, clickedItem.Name, currentFolder):upLoadCommand);
-                    upLoadCommand = (UploadContinue)upLoadCommand.Abort();
-                }
-                else//文件正在被下载
-                {
-                    downLoadCommand = (downLoadCommand == null? new DownloadCommand(mainFtp, clickedItem.Name, currentFolder):downLoadCommand);
-                    downLoadCommand=(DownloadContinue)downLoadCommand.Abort();
-                }
+                TransferCommand cmd = file2cmd[clickedItem];
+                readyQueue.Dequeue();
+                cmd = cmd.Abort() as TransferCommand;
+                file2cmd[clickedItem] = cmd;
+                waitingList.Add(cmd);
             }   
         }
 
-        /*private void downClick(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog fileDialog = new OpenFileDialog();
-            fileDialog.Multiselect = true;
-            fileDialog.Title = "请选择要下载的文件";
-            fileDialog.InitialDirectory = "ftp://192.168.0.105/";//打开服务器根目录
-            //fileDialog.Filter=
-            fileDialog.RestoreDirectory = true;
-            FileInfo fileInfo;
-            if (fileDialog.ShowDialog() == true)
-            {
-                //textBox1.Text = System.IO.Path.GetFileNameWithoutExtension(fileDialog.FileName);
-                System.IO.Path.GetFullPath(fileDialog.FileName); //绝对路径
-                System.IO.Path.GetExtension(fileDialog.FileName); //文件扩展名
-                System.IO.Path.GetFileNameWithoutExtension(fileDialog.FileName); //文件名没有扩展名
-                System.IO.Path.GetFileName(fileDialog.FileName); //得到文件
-                System.IO.Path.GetDirectoryName(fileDialog.FileName); //得到路径
-                fileInfo = new FileInfo(fileDialog.FileName);
-
-                this.listView.Items.Add(new File(fileDialog.FileName, CountSize(GetFileSize(fileDialog.FileName)), 0));
-            }
-            
-        }*/
         /// <summary>
         /// 获取文件大小
         /// </summary>
