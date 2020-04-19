@@ -300,6 +300,7 @@ namespace FTPClient
                 //TaskScheduler taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
                 Task.Factory.StartNew(()=>
                 {
+                    Console.WriteLine("start to delete ui item");
                     for (int i = 0; i < files.Count(); i++)
                     {
                         File f = files[i];
