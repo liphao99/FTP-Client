@@ -40,7 +40,7 @@ namespace FTPUtil
                 reply = ftp.ReadControlPort();
             }
             int breakpoint = Point;
-            return null;//return new DownloadContinue(ftp,source,destination,breakpoint);
+            return new DownloadContinue(this.ftp, this.Source, this.Destination, this.Point);
         }
 
         /// <summary>
