@@ -24,9 +24,24 @@ namespace FTPUtil
             this.Destination = destination;
         }
 
+
+        /// <summary>
+        /// 中断上传，返回断点续传类
+        /// </summary>
+        /// <returns></returns>
         public override Command Abort()
         {
-            throw new NotImplementedException();
+            if (!started)
+            {
+                return null;
+            }
+            lock (lockObj)
+            {
+                ftp.CloseDataPort();
+                ftp.Send("ABOR");
+                reply = ftp.ReadControlPort();
+            }
+            return new UploadContinue(ftp, Source, Destination, Point);
         }
 
         /// <summary>
@@ -39,17 +54,12 @@ namespace FTPUtil
             * 通过连接进行IO写入
             * 清理资源
             */
-            String[] dirArr = this.Source.Split('/');
+            String[] dirArr = this.Source.Split('\\');
             String fileName = dirArr[dirArr.Length - 1];
             ftp.ConnectDataPortByPASV();
             ftp.Send("CWD " + Destination + "\r\n");
             reply = ftp.ReadControlPort();
             Console.WriteLine(reply);
-            //if (!reply.Equals("250"))
-            //{
-            //    throw new Exception("Exception occurs!");
-            //}
-
             ftp.Send("STOR " + fileName + "\r\n");
             reply = ftp.ReadControlPort();
             Console.WriteLine(reply);
@@ -61,10 +71,11 @@ namespace FTPUtil
             FileStream fs = new FileStream(Source, FileMode.Open, FileAccess.Read);
             try
             {
+                int count = 0;
                 byte[] buffer = new byte[fs.Length];
-                fs.Read(buffer, 0, (int)fs.Length);
-                //TODO: 通过data port传输buffer
-                ftp.WriteDataPort(buffer);
+                fs.Read(buffer, Point, (int)fs.Length);
+                ftp.WriteDataPort(buffer, ref count);
+                this.Point = count;
 
             }
             catch(IOException e)

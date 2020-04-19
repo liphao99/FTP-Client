@@ -145,12 +145,12 @@ namespace FTPUtil
             return buffer;
         }
 
-        internal void WriteDataPort(byte[] buffer)
+        internal void WriteDataPort(byte[] buffer, ref int count)
         {
             if (!dataPortOpen) throw new Exception("Data port isn't open");
             try
             {
-                dataSocket.Send(buffer, 0);
+               count =  dataSocket.Send(buffer, 0);
             }catch(IOException e)
             {
                 Console.WriteLine(e.Message);

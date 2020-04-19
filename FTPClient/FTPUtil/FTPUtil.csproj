@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DownloadCommand.cs" />
+    <Compile Include="DownloadContinue.cs" />
     <Compile Include="FTP.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="ListCommand.cs" />
