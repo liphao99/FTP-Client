@@ -294,7 +294,7 @@ namespace FTPClient
                 //TODO:移除传输界面的该项传输信息
                 string size = CountSize((long)transfer.Size);
                 //this.listView.Items.Remove();
-                File file = new File(transfer.Source,CountSize((long)transfer.Size),0);
+                File file = new File(transfer.Source,CountSize((long)transfer.Size),0, false);
                 //Thread thread = new Thread(new ParameterizedThreadStart(updateFiles));
                 //thread.Start(file);
                 //TaskScheduler taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
@@ -375,7 +375,7 @@ namespace FTPClient
             //在传输队列视图中更新相关的控件
             long size = (long)upload.Size;
 
-            File file = new File(path, CountSize(size), 0);
+            File file = new File(path, CountSize(size), 0, true);
             this.listView.Items.Add(file);
             this.files.Add(file);
             //for(int i=0;i<files.Count();i++)
@@ -421,7 +421,7 @@ namespace FTPClient
             }
             //在传输队列视图中更新相关的控件
             long size = (long)download.Size;
-            this.listView.Items.Add(new File(path, CountSize(size), 0));
+            this.listView.Items.Add(new File(path, CountSize(size), 0, false));
 
             //MessageBox.Show(path);
             //this.listView.Items.Add(new File(path, CountSize(GetFileSize(path)), 0));
@@ -491,16 +491,37 @@ namespace FTPClient
         {
             Button button = sender as Button;
             File clickedItem = button.DataContext as File;
+            UploadCommand upLoadCommand = null;
+            DownloadCommand downLoadCommand = null; 
 
-            if (button.Content.ToString() == "开始")
+
+            if (button.Content.ToString() == "开始")//重新开始上传
             {
                 button.Content = "暂停";
                 clickedItem.Percentage += 10;
+                if (clickedItem.IsUpLoad)
+                {
+                    upLoadCommand.Execute();
+                }
+                else
+                {
+                    downLoadCommand.Execute();
+                }
             }            
-            else if (button.Content.ToString() == "暂停")
+            else if (button.Content.ToString() == "暂停")//暂停上传
             {
                 button.Content = "开始";
                 clickedItem.Percentage -= 10;
+                if (clickedItem.IsUpLoad)//文件正在被上传
+                {
+                    upLoadCommand = (upLoadCommand == null ? new UploadCommand(mainFtp, clickedItem.Name, currentFolder):upLoadCommand);
+                    upLoadCommand = (UploadContinue)upLoadCommand.Abort();
+                }
+                else//文件正在被下载
+                {
+                    downLoadCommand = (downLoadCommand == null? new DownloadCommand(mainFtp, clickedItem.Name, currentFolder):downLoadCommand);
+                    downLoadCommand=(DownloadContinue)downLoadCommand.Abort();
+                }
             }   
         }
 

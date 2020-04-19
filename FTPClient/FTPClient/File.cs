@@ -49,12 +49,24 @@ namespace FTPClient
                 }
             }
         }
-
-        public File(string name, string size, double percentage)
+        private Boolean isUpLoad;
+        public Boolean IsUpLoad
+        {
+            get { return isUpLoad; }
+            set {
+                if (this.PropertyChanged != null)
+                {
+                    this.PropertyChanged.Invoke(this, new PropertyChangedEventArgs("IsUpLoad"));
+                }
+            }
+        }
+        
+        public File(string name, string size, double percentage,Boolean isupload)
         {
             this.Name = name;
             this.Size = size;
             this.Percentage = percentage;
+            this.IsUpLoad = isupload;
         }
         public event PropertyChangedEventHandler PropertyChanged;
 

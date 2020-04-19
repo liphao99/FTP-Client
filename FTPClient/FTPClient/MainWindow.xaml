@@ -142,8 +142,8 @@
                             <GridView>
                                 <GridViewColumn Header="文件名" Width="210" DisplayMemberBinding="{Binding Name}"/>
                                 <GridViewColumn Header="大小" Width="150" DisplayMemberBinding="{Binding Size}"/>
-                                <!--<GridViewColumn Header="状态" Width="250" DisplayMemberBinding="{Binding Percentage}">-->
-                                <GridViewColumn Header="状态" Width="250">
+                                <GridViewColumn Header="状态" Width="250" DisplayMemberBinding="{Binding Percentage}"/>
+                                <!--<GridViewColumn Header="状态" Width="250">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
@@ -151,7 +151,7 @@
                                             </StackPanel>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
+                                </GridViewColumn>-->
                                 <GridViewColumn Header="操作" Width="150">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>

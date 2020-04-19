@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FTPUtil
 {
-    class DownloadContinue : DownloadCommand
+    public class DownloadContinue : DownloadCommand
     {
 
         public DownloadContinue(FTP ftp, String source, String destination, int Point) : base(ftp, source, destination)
